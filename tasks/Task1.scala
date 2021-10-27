@@ -18,7 +18,7 @@ object Task1 extends App{
   def sumArrayRecursive(arr:Array[Int]): Int ={
     // Create a function that sums the elements in an array of integers using recursion.
     if(arr.isEmpty) 0
-    else arr(0) + subtask_c(arr.drop(1))
+    else arr(0) + sumArrayRecursive(arr.drop(1))
   }
 
   def fib(n: BigInt): BigInt ={
