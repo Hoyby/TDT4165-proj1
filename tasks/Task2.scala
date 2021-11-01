@@ -46,7 +46,7 @@ object Task2 extends App{
   def deadlock(): Unit ={
     // A deadlock occurs when two processes are waiting for a resource that is locked by the the other process.
     // An example:
-    // Thread 1 (T1) wants resource 1 (R1) and resource 1 (R2).
+    // Thread 1 (T1) wants resource 1 (R1) and resource 2 (R2).
     // Thread 2 (T2) also wants R1 and R2.
     // T1 locks R1 but gets interrupted by T2 locking R2.
     // Now both T1 and T2 are waiting for R2 and R1 respectively -> We have a deadlock.
