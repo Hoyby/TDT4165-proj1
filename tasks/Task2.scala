@@ -17,6 +17,7 @@ object Task2 extends App{
     }
   }
 
+  /* Task 2c */
   def increaseCounterAtomic(): Unit = this.synchronized {
     for (_ <- 0 to 5) {
       counter += 1
