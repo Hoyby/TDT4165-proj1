@@ -3,19 +3,50 @@ class Bank(val allowedAttempts: Integer = 3) {
     private val transactionsQueue: TransactionQueue = new TransactionQueue()
     private val processedTransactions: TransactionQueue = new TransactionQueue()
 
-    def addTransactionToQueue(from: Account, to: Account, amount: Double): Unit = ???
-                                                // TODO
-                                                // project task 2
-                                                // create a new transaction object and put it in the queue
-                                                // spawn a thread that calls processTransactions
+    def addTransactionToQueue(from: Account, to: Account, amount: Double): Unit = {
 
-    private def processTransactions: Unit = ???
-                                                // TOO
-                                                // project task 2
-                                                // Function that pops a transaction from the queue
-                                                // and spawns a thread to execute the transaction.
-                                                // Finally do the appropriate thing, depending on whether
-                                                // the transaction succeeded or not
+      // Create a new transaction object
+      val transaction = new Transaction(
+        transactionsQueue,
+        transactionsQueue,
+        from,
+        to,
+        amount,
+        allowedAttempts)
+
+      // Put transaction object in the queue
+      transactionsQueue.push(transaction)
+
+      // spawn a thread that calls processTransactions
+      val thread: Thread = new Thread(() => processTransactions)
+      thread.start()
+
+    }
+
+    private def processTransactions: Unit = {
+
+      // Pop a transaction from the queue
+      val transaction = transactionsQueue.pop
+
+      // Spawns a thread to execute the transaction.
+      val thread: Thread = new Thread(() => transaction.run)
+      thread.start()
+
+      // Finally do the appropriate thing, depending on whether
+      // the transaction succeeded or not
+      if (transaction.attempt >= transaction.allowedAttempts) {
+        transaction.status = TransactionStatus.FAILED
+      } else if (transaction.status == TransactionStatus.PENDING) {
+        transaction.attempt += 1
+        transactionsQueue.push(transaction)
+        processTransactions // retry
+      } else { // success
+        processedTransactions.push(transaction)
+      }
+
+
+    }
+
 
     def addAccount(initialBalance: Double): Account = {
         new Account(this, initialBalance)

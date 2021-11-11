@@ -8,36 +8,24 @@ object TransactionStatus extends Enumeration {
 
 class TransactionQueue {
 
-    // TODO
     // project task 1.1
     // Add datastructure to contain the transactions
-
     val queue: mutable.Queue[Transaction] = mutable.Queue[Transaction]()
 
     // Remove and return the first element from the queue
-    def pop: Transaction = this.synchronized {
-      queue.dequeue()
-    }
+    def pop: Transaction = this synchronized queue.dequeue
 
     // Return whether the queue is empty
-    def isEmpty: Boolean = this.synchronized {
-      queue.isEmpty
-    }
+    def isEmpty: Boolean = this synchronized queue.isEmpty
 
     // Add new element to the back of the queue
-    def push(t: Transaction): Unit = this.synchronized {
-      queue.enqueue(t)
-    }
+    def push(t: Transaction): Unit = this synchronized queue.enqueue(t)
 
     // Return the first element from the queue without removing it
-    def peek: Transaction = this.synchronized {
-      queue.front
-    }
+    def peek: Transaction = this synchronized queue.front
 
     // Return an iterator to allow you to iterate over the queue
-    def iterator: Iterator[Transaction] = this.synchronized {
-      queue.iterator
-    }
+    def iterator: Iterator[Transaction] = this synchronized queue.iterator
 }
 
 class Transaction(val transactionsQueue: TransactionQueue,
@@ -45,18 +33,24 @@ class Transaction(val transactionsQueue: TransactionQueue,
                   val from: Account,
                   val to: Account,
                   val amount: Double,
-                  val allowedAttemps: Int) extends Runnable {
+                  val allowedAttempts: Int) extends Runnable {
 
   var status: TransactionStatus.Value = TransactionStatus.PENDING
   var attempt = 0
 
   override def run: Unit = {
 
-      def doTransaction() = {
-          // TODO - project task 3
-          // Extend this method to satisfy requirements.
-          from withdraw amount
-          to deposit amount
+      def doTransaction(): Unit = {
+        attempt += 1;
+
+        var withdraw : Either[Unit, String] = from.withdraw(amount);
+        if (withdraw.isRight){
+          status = TransactionStatus.PENDING;
+          return withdraw
+        }
+        to.deposit(amount)
+        status = TransactionStatus.SUCCESS;
+
       }
 
       // TODO - project task 3
