@@ -37,7 +37,6 @@ class Bank(val allowedAttempts: Integer = 3) {
       // the transaction succeeded or not
 
       if (transaction.status == TransactionStatus.PENDING) {
-        print(transaction.attempt)
         transactionsQueue.push(transaction)
         processTransactions() // retry
       } else { // success or failed
