@@ -1,3 +1,5 @@
+import scala.annotation.tailrec
+
 class Bank(val allowedAttempts: Integer = 3) {
 
     private val transactionsQueue: TransactionQueue = new TransactionQueue()
@@ -9,34 +11,37 @@ class Bank(val allowedAttempts: Integer = 3) {
       // Put transaction object in the queue
       transactionsQueue.push(new Transaction(
         transactionsQueue,
-        transactionsQueue,
+        processedTransactions,
         from,
         to,
         amount,
         allowedAttempts))
 
       // spawn a thread that calls processTransactions
-      Main.thread(processTransactions)
+      new Thread(() => processTransactions()).start()
 
     }
 
-    private def processTransactions: Unit = {
+    @tailrec
+    private def processTransactions(): Unit = {
 
       // Pop a transaction from the queue
       val transaction = transactionsQueue.pop
 
       // Spawns a thread to execute the transaction.
-      transaction.run
+      val transactionThread = new Thread(transaction)
+      transactionThread.start()
+      transactionThread.join()
 
       // Finally do the appropriate thing, depending on whether
       // the transaction succeeded or not
-      if (transaction.attempt >= transaction.allowedAttempts) {
-        transaction.status = TransactionStatus.FAILED
-      } else if (transaction.status == TransactionStatus.PENDING) {
+
+      if (transaction.status == TransactionStatus.PENDING) {
         print(transaction.attempt)
         transactionsQueue.push(transaction)
-        processTransactions // retry
-      } else { // success
+        processTransactions() // retry
+      } else { // success or failed
+        //processedTransactions.push(transaction)
         processedTransactions.push(transaction)
       }
     }

@@ -41,25 +41,25 @@ class Transaction(val transactionsQueue: TransactionQueue,
   override def run: Unit = {
 
       def doTransaction(): Unit = {
-        attempt += 1;
-
-        val withdraw : Either[Unit, String] = from.withdraw(amount);
-        if (withdraw.isRight){
-          return
+        attempt += 1
+        val withdraw : Either[Unit, String] = from.withdraw(amount)
+        if (withdraw.isLeft){
+          to.deposit(amount)
+          status = TransactionStatus.SUCCESS
         }
-        to.deposit(amount)
-        status = TransactionStatus.SUCCESS;
-
+        else if (attempt >= allowedAttempts) {
+          status = TransactionStatus.FAILED
+        }
       }
 
       // TODO - project task 3
       // make the code below thread safe
-      if (status == TransactionStatus.PENDING) {
-          doTransaction
-          Thread.sleep(50) // you might want this to make more room for
-                           // new transactions to be added to the queue
-      }
 
+      if (status == TransactionStatus.PENDING) {
+        doTransaction()
+        Thread.sleep(50) // you might want this to make more room for
+        // new transactions to be added to the queue
+      }
 
     }
 }
