@@ -6,20 +6,17 @@ class Bank(val allowedAttempts: Integer = 3) {
     def addTransactionToQueue(from: Account, to: Account, amount: Double): Unit = {
 
       // Create a new transaction object
-      val transaction = new Transaction(
+      // Put transaction object in the queue
+      transactionsQueue.push(new Transaction(
         transactionsQueue,
         transactionsQueue,
         from,
         to,
         amount,
-        allowedAttempts)
-
-      // Put transaction object in the queue
-      transactionsQueue.push(transaction)
+        allowedAttempts))
 
       // spawn a thread that calls processTransactions
-      val thread: Thread = new Thread(() => processTransactions)
-      thread.start()
+      Main.thread(processTransactions)
 
     }
 
@@ -29,22 +26,19 @@ class Bank(val allowedAttempts: Integer = 3) {
       val transaction = transactionsQueue.pop
 
       // Spawns a thread to execute the transaction.
-      val thread: Thread = new Thread(() => transaction.run)
-      thread.start()
+      transaction.run
 
       // Finally do the appropriate thing, depending on whether
       // the transaction succeeded or not
       if (transaction.attempt >= transaction.allowedAttempts) {
         transaction.status = TransactionStatus.FAILED
       } else if (transaction.status == TransactionStatus.PENDING) {
-        transaction.attempt += 1
+        print(transaction.attempt)
         transactionsQueue.push(transaction)
         processTransactions // retry
       } else { // success
         processedTransactions.push(transaction)
       }
-
-
     }
 
 

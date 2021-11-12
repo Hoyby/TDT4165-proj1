@@ -43,10 +43,9 @@ class Transaction(val transactionsQueue: TransactionQueue,
       def doTransaction(): Unit = {
         attempt += 1;
 
-        var withdraw : Either[Unit, String] = from.withdraw(amount);
+        val withdraw : Either[Unit, String] = from.withdraw(amount);
         if (withdraw.isRight){
-          status = TransactionStatus.PENDING;
-          return withdraw
+          return
         }
         to.deposit(amount)
         status = TransactionStatus.SUCCESS;
